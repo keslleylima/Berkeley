@@ -61,10 +61,11 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         value = 0
         transitionStateProbs = self.mdp.getTransitionStatesAndProbs(state, action)
-        initialState = transitionStateProbs[0]
-        prob = transitionStateProbs[1]
+
 
         for transitionStateProbs in transitionStateProbs:
+            initialState = transitionStateProbs[0]
+            prob = transitionStateProbs[1]
             value = (prob * (self.mdp.getReward(state, action, initialState) + (self.discount * self.getValue(state))))
 
         return value
