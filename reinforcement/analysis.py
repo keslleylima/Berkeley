@@ -21,7 +21,7 @@
 
 def question2():
     answerDiscount = 0.9
-    answerNoise = 0.2
+    answerNoise = 0.001 # O.0 or 0.01 it's work too
     return answerDiscount, answerNoise
 
 def question3a():
