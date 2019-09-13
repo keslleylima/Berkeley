@@ -67,7 +67,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         for transitionStateProbs in transitionStateProbs:
             value = (prob * (self.mdp.getReward(state, action, initialState) + (self.discount * self.getValue(state))))
 
-        return  value
+        return value
 
         util.raiseNotDefined()
 
