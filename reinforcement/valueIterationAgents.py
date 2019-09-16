@@ -11,32 +11,6 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-"""
-La idea es iterar la matriz de valores de forma tal de conseguir una convergencia.
-La cantidad de iteraciones pedidas puede verse tambien como la cantidad de "pasos" disponibles.
-Es decir que luego de esa cantidad, el juego termina. Por ello tiene sentido que siendo i=0, los
-valores de la matriz sean cero, ya que aunque estemos en el estado terminal no podremos tomar la accion
-final.
-
-Tendremos un vector en donde estara guardada la utilidad que podremos obtener actuando optimamente desde dicho estado, el mismo comienza inicializado en cero.
-
-Por cada iteracion se actualiza la informacion de utilidad acerca de cada uno de los estados. El valor que se le asigna corresponde a la utilidad maxima que se puede obtener de actuar de la forma optima en ese estado. A esto se le llama q-state.
-
-Un q-state es una tupla conformada por un estado s y la accion a que tomamos en ese estado. La utilidad de un q-state se calcula promediando las utilidades de cada una de las transiciones posibles (recordemos que estamos en un MDP y por lo tanto la accion puede tener multiples estados posibles), en la cual se encuentra la funcion de descuento.
-
-Formalmente:
-
-R(s,a,s') = "Reward for taking action a from state s and reaching s'."
-T(s,a,s') = P(s'|s,a)
-
-Initialization:
-    V_{0}(s) = 0
-
-Iteration:
-    Q*(s,a) = sum[s'] T(s,a,s')[R(s,a,s')+a.V_{k}(s)]
-    V_{k+1}(s) = max[a] Q*(s,a)
-"""
-
 import mdp, util
 
 from learningAgents import ValueEstimationAgent
