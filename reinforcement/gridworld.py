@@ -311,6 +311,13 @@ def getMazeGrid():
             ['S',' ',' ',' ']]
     return Gridworld(grid)
 
+def getBookCliffGrid():
+    grid = [[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['S', -100, -100, -100, -100, -100, -100, -100, -100, -100, -1]]
+    return Gridworld(grid)
+
 
 
 def getUserAction(state, actionFunction):
@@ -392,6 +399,15 @@ def parseOptions():
     optParser.add_option('-e', '--epsilon',action='store',
                          type='float',dest='epsilon',default=0.3,
                          metavar="E", help='Chance of taking a random action in q-learning (default %default)')
+
+    optParser.add_option('-y', '--edecay', action='store',
+                         type='float', dest='edecay', default=1,
+                         metavar="Y", help='Decay rate of epsilon (used for SARSA - default %default)')
+
+    optParser.add_option('--lambda', action='store',
+                         type='float', dest='lamda', default=0, # the typo 'lamda' is intentional
+                         metavar="Y", help='Lambda factor for eligibility traces (used for SARSA - default %default)')
+
     optParser.add_option('-l', '--learningRate',action='store',
                          type='float',dest='learningRate',default=0.5,
                          metavar="P", help='TD learning rate (default %default)' )
@@ -408,7 +424,7 @@ def parseOptions():
                          help='Request a window width of X pixels *per grid cell* (default %default)')
     optParser.add_option('-a', '--agent',action='store', metavar="A",
                          type='string',dest='agent',default="random",
-                         help='Agent type (options are \'random\', \'value\' and \'q\', default %default)')
+                         help='Agent type (options are \'random\', \'value\', \'s\' and \'q\', default %default)')
     optParser.add_option('-t', '--text',action='store_true',
                          dest='textDisplay',default=False,
                          help='Use text-only ASCII display')
@@ -429,9 +445,9 @@ def parseOptions():
 
     opts, args = optParser.parse_args()
 
-    if opts.manual and opts.agent != 'q':
+    if opts.manual and opts.agent not in 'qs':
         print '## Disabling Agents in Manual Mode (-m) ##'
-        opts.agent = None
+        #opts.agent = None
 
     # MANAGE CONFLICTS
     if opts.textDisplay or opts.quiet:
@@ -479,11 +495,11 @@ if __name__ == '__main__':
     # GET THE AGENT
     ###########################
 
-    import valueIterationAgents, qlearningAgents
+    import valueIterationAgents, qlearningAgents, sarsaAgents
     a = None
     if opts.agent == 'value':
         a = valueIterationAgents.ValueIterationAgent(mdp, opts.discount, opts.iters)
-    elif opts.agent == 'q':
+    elif opts.agent in 'qs':
         #env.getPossibleActions, opts.discount, opts.learningRate, opts.epsilon
         #simulationFn = lambda agent, state: simulation.GridworldSimulation(agent,state,mdp)
         gridWorldEnv = GridworldEnvironment(mdp)
@@ -492,7 +508,12 @@ if __name__ == '__main__':
                       'alpha': opts.learningRate,
                       'epsilon': opts.epsilon,
                       'actionFn': actionFn}
-        a = qlearningAgents.QLearningAgent(**qLearnOpts)
+        if opts.agent == 'q':
+            a = qlearningAgents.QLearningAgent(**qLearnOpts)
+        else: # sarsa
+            qLearnOpts['epsilon_decay'] = opts.edecay
+            qLearnOpts['lamda'] = opts.lamda
+            a = sarsaAgents.SarsaAgent(**qLearnOpts)
     elif opts.agent == 'random':
         # # No reason to use the random agent without episodes
         if opts.episodes == 0:
@@ -543,7 +564,7 @@ if __name__ == '__main__':
         else:
             if opts.agent == 'random': displayCallback = lambda state: display.displayValues(a, state, "CURRENT VALUES")
             if opts.agent == 'value': displayCallback = lambda state: display.displayValues(a, state, "CURRENT VALUES")
-            if opts.agent == 'q': displayCallback = lambda state: display.displayQValues(a, state, "CURRENT Q-VALUES")
+            if opts.agent in 'qs': displayCallback = lambda state: display.displayQValues(a, state, "CURRENT Q-VALUES")
 
     messageCallback = lambda x: printString(x)
     if opts.quiet:
@@ -575,7 +596,7 @@ if __name__ == '__main__':
         print
 
     # DISPLAY POST-LEARNING VALUES / Q-VALUES
-    if opts.agent == 'q' and not opts.manual:
+    if opts.agent in 'qs' and not opts.manual:
         try:
             display.displayQValues(a, message = "Q-VALUES AFTER "+str(opts.episodes)+" EPISODES")
             display.pause()
