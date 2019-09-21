@@ -51,7 +51,7 @@ class SarsaAgent(ReinforcementAgent):
     def __init__(self, epsilon_decay=1, lamda=0, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
-
+        self.qvalues = {}
         "*** YOUR CODE HERE ***"
 
     def getQValue(self, state, action):
@@ -64,9 +64,6 @@ class SarsaAgent(ReinforcementAgent):
             return self.qvalues[(state,action)]
         else:
             return 0.0
-
-        util.raiseNotDefined()
-
 
     def computeValueFromQValues(self, state):
         """
@@ -83,8 +80,6 @@ class SarsaAgent(ReinforcementAgent):
         values = (self.getQValue(state, action) for action in possibleActions)
 
         return max(values)
-
-        util.raiseNotDefined()
 
     def computeActionFromQValues(self, state):
         """
@@ -103,8 +98,6 @@ class SarsaAgent(ReinforcementAgent):
                 qactions[action] = self.getQValue(state,action)
 
         return qactions.argMax()
-
-        util.raiseNotDefined()
 
     def computeAction(self, state):
         """
@@ -149,15 +142,12 @@ class SarsaAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        if state not in self.qvalues and action not in self.qvalues:
+        if (state, action) not in self.qvalues:
           self.qvalues[(state, action)] = 0.0
 
-        nextStateValue = self.computeValueFromQValues(nextState)
-        aux = reward + (self.discount * nextStateValue) - self.qvalues[(state, action)]
+        aux = reward + (self.discount * self.computeValueFromQValues(nextState)) - self.qvalues[(state, action)]
 
         self.qvalues[(state, action)] = self.qvalues[(state, action)] + (self.alpha * aux)
-
-        util.raiseNotDefined()
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
