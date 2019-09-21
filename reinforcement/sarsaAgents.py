@@ -60,7 +60,11 @@ class SarsaAgent(ReinforcementAgent):
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
-        "*** YOUR CODE HERE ***"
+        if (state,action) in self.qvalues:
+            return self.qvalues[(state,action)]
+        else:
+            return 0.0
+
         util.raiseNotDefined()
 
 
@@ -71,7 +75,15 @@ class SarsaAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        "*** YOUR CODE HERE ***"
+        possibleActions = self.getLegalActions(state)
+
+        if len(possibleActions) == 0:
+            return 0
+
+        values = (self.getQValue(state, action) for action in possibleActions)
+
+        return max(values)
+
         util.raiseNotDefined()
 
     def computeActionFromQValues(self, state):
@@ -80,7 +92,18 @@ class SarsaAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        "*** YOUR CODE HERE ***"
+        possibleActions = self.getLegalActions(state)
+
+        if len(possibleActions) == 0:
+            return None
+
+        qactions = util.Counter()
+
+        for action in possibleActions:
+                qactions[action] = self.getQValue(state,action)
+
+        return qactions.argMax()
+
         util.raiseNotDefined()
 
     def computeAction(self, state):
@@ -97,7 +120,14 @@ class SarsaAgent(ReinforcementAgent):
         # Pick Action
         legalActions = self.getLegalActions(state)
         action = None
-        "*** YOUR CODE HERE ***"
+
+        if   random.choice(list) < self.epsilon:
+            action = max(legalActions,[len((state))])
+        else:
+            action = random.randint(0, len(action))
+
+        return action
+        
         util.raiseNotDefined()
 
         return action
@@ -119,7 +149,14 @@ class SarsaAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        "*** YOUR CODE HERE ***"
+        if state not in self.qvalues and action not in self.qvalues:
+          self.qvalues[(state, action)] = 0.0
+
+        nextStateValue = self.computeValueFromQValues(nextState)
+        aux = reward + (self.discount * nextStateValue) - self.qvalues[(state, action)]
+
+        self.qvalues[(state, action)] = self.qvalues[(state, action)] + (self.alpha * aux)
+
         util.raiseNotDefined()
 
     def getPolicy(self, state):
