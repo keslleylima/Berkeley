@@ -11,7 +11,7 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 # SARSA Agent extension by Anderson Tavares (anderson@dcc.ufmg.br)
-
+import numpy as np
 
 from game import *
 from learningAgents import ReinforcementAgent
@@ -111,7 +111,23 @@ class SarsaAgent(ReinforcementAgent):
           HINT: To pick randomly from a list, use random.choice(list)
         """
         # Pick Action
+        self.check_state_exist(state)
 
+        # action selection
+        if np.random.rand() < self.epsilon:
+            # choose best action
+            state_action = self.q_table.loc[state, :]
+            # some actions may have the same value, randomly choose on in these actions
+            action = np.random.choice(state_action[state_action == np.max(state_action)].index)
+        else:
+            # choose random action
+            action = np.random.choice(self.actions)
+        return action
+
+    def getAction(self, state):
+        """
+          Returns the action computed in computeAction
+        """
         legalActions = self.getLegalActions(state)
 
         if len(legalActions) == 0:
@@ -123,14 +139,6 @@ class SarsaAgent(ReinforcementAgent):
         action= self.computeActionFromQValues(state)
 
         return action
-
-
-    def getAction(self, state):
-        """
-          Returns the action computed in computeAction
-        """
-        actions = self.computeAction(state)
-        return actions
 
 
     def update(self, state, action, nextState, reward):
