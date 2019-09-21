@@ -119,11 +119,6 @@ class SarsaAgent(ReinforcementAgent):
         """
         # Pick Action
 
-
-    def getAction(self, state):
-        """
-          Returns the action computed in computeAction
-        """
         legalActions = self.getLegalActions(state)
 
         if len(legalActions) == 0:
@@ -135,6 +130,14 @@ class SarsaAgent(ReinforcementAgent):
         action= self.computeActionFromQValues(state)
 
         return action
+
+
+    def getAction(self, state):
+        """
+          Returns the action computed in computeAction
+        """
+        actions = self.computeAction(state)
+        return actions
 
 
     def update(self, state, action, nextState, reward):
