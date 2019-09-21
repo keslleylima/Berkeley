@@ -118,26 +118,23 @@ class SarsaAgent(ReinforcementAgent):
           HINT: To pick randomly from a list, use random.choice(list)
         """
         # Pick Action
-        legalActions = self.getLegalActions(state)
-        action = None
 
-        if   random.choice(list) < self.epsilon:
-            action = max(legalActions,[len((state))])
-        else:
-            action = random.randint(0, len(action))
-
-        return action
-        
-        util.raiseNotDefined()
-
-        return action
 
     def getAction(self, state):
         """
           Returns the action computed in computeAction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legalActions = self.getLegalActions(state)
+
+        if len(legalActions) == 0:
+          return None
+
+        if util.flipCoin(self.epsilon):
+          return random.choice(legalActions)
+
+        action= self.computeActionFromQValues(state)
+
+        return action
 
 
     def update(self, state, action, nextState, reward):
