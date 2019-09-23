@@ -113,14 +113,10 @@ class SarsaAgent(ReinforcementAgent):
         # Pick Action
         self.check_state_exist(state)
 
-        # action selection
         if np.random.rand() < self.epsilon:
-            # choose best action
             state_action = self.q_table.loc[state, :]
-            # some actions may have the same value, randomly choose on in these actions
             action = np.random.choice(state_action[state_action == np.max(state_action)].index)
         else:
-            # choose random action
             action = np.random.choice(self.actions)
         return action
 
