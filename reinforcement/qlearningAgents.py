@@ -81,10 +81,10 @@ class QLearningAgent(ReinforcementAgent):
         """
         possibleActions = self.getLegalActions(state)
 
+        qactions = util.Counter()
+
         if len(possibleActions) == 0:
             return None
-
-        qactions = util.Counter()
 
         for action in possibleActions:
                 qactions[action] = self.getQValue(state,action)
