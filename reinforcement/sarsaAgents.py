@@ -11,7 +11,7 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 # SARSA Agent extension by Anderson Tavares (anderson@dcc.ufmg.br)
-import numpy as np
+
 
 from game import *
 from learningAgents import ReinforcementAgent
@@ -51,8 +51,10 @@ class SarsaAgent(ReinforcementAgent):
     def __init__(self, epsilon_decay=1, lamda=0, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
-        self.qvalues = {}
-        "*** YOUR CODE HERE ***"
+        self.qvalues = util.Counter()
+        self.epsilon_decay = epsilon_decay
+        self.lamda = lamda
+        self.traces = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -60,10 +62,11 @@ class SarsaAgent(ReinforcementAgent):
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
-        if (state,action) in self.qvalues:
-            return self.qvalues[(state,action)]
+        if (state,action) not in self.qvalues:
+          return 0.0
         else:
-            return 0.0
+          return self.qvalues[(state, action)]
+
 
     def computeValueFromQValues(self, state):
         """
@@ -72,12 +75,12 @@ class SarsaAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        possibleActions = self.getLegalActions(state)
+        legalActions = self.getLegalActions(state)
 
-        if len(possibleActions) == 0:
+        if len(legalActions) == 0:
             return 0
 
-        values = (self.getQValue(state, action) for action in possibleActions)
+        values = (self.getQValue(state, action) for action in legalActions)
 
         return max(values)
 
@@ -87,17 +90,14 @@ class SarsaAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        possibleActions = self.getLegalActions(state)
+        legalActions = self.getLegalActions(state)
 
-        if len(possibleActions) == 0:
-            return None
+        if len(legalActions) == 0:
+            return 0
 
-        qactions = util.Counter()
+        values = (self.getQValue(state, action) for action in legalActions)
 
-        for action in possibleActions:
-                qactions[action] = self.getQValue(state,action)
-
-        return qactions.argMax()
+        return max(values)
 
     def computeAction(self, state):
         """
@@ -111,30 +111,24 @@ class SarsaAgent(ReinforcementAgent):
           HINT: To pick randomly from a list, use random.choice(list)
         """
         # Pick Action
-        self.check_state_exist(state)
+        legalActions = self.getLegalActions(state)
 
-        if np.random.rand() < self.epsilon:
-            state_action = self.q_table.loc[state, :]
-            action = np.random.choice(state_action[state_action == np.max(state_action)].index)
+        if len(legalActions) > 0:
+            if util.flipCoin(self.epsilon):
+                action = random.choice(legalActions)
+            else:
+                action = self.computeActionFromQValues(state)
         else:
-            action = np.random.choice(self.actions)
+            return None
+
+        self.epsilon = self.epsilon * self.epsilon_decay
         return action
 
     def getAction(self, state):
         """
           Returns the action computed in computeAction
         """
-        legalActions = self.getLegalActions(state)
-
-        if len(legalActions) == 0:
-          return None
-
-        if util.flipCoin(self.epsilon):
-          return random.choice(legalActions)
-
-        action= self.computeActionFromQValues(state)
-
-        return action
+        return self.computeAction(state)
 
 
     def update(self, state, action, nextState, reward):
@@ -146,12 +140,8 @@ class SarsaAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        if (state, action) not in self.qvalues:
-          self.qvalues[(state, action)] = 0.0
-
-        aux = reward + (self.discount * self.computeValueFromQValues(nextState)) - self.qvalues[(state, action)]
-
-        self.qvalues[(state, action)] = self.qvalues[(state, action)] + (self.alpha * aux)
+        "*** YOUR CODE HERE ***"
+        util.raiseNotDefined()
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -213,8 +203,12 @@ class ApproximateSarsaAgent(PacmanSarsaAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        features = self.featExtractor.getFeatures(state, action)
+
+        qValue = sum((features[feature]*self.weights[feature] for feature in features))
+
+        return qValue
+
 
     def update(self, state, action, nextState, reward):
         """
@@ -231,5 +225,5 @@ class ApproximateSarsaAgent(PacmanSarsaAgent):
         # did we finish training?
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
-            "*** YOUR CODE HERE ***"
+            print self.weights
             pass
