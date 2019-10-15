@@ -21,8 +21,8 @@ import random,util,math
 class QLearningAgent(ReinforcementAgent):
     """
       Q-Learning Agent
-
-      Functions you should fill in:
+      
+      Functions you should fill in:    
         - computeValueFromQValues
         - computeActionFromQValues
         - getQValue
@@ -33,11 +33,11 @@ class QLearningAgent(ReinforcementAgent):
         - self.epsilon (exploration prob)
         - self.alpha (learning rate)
         - self.discount (discount rate)
-
       Functions you should use
         - self.getLegalActions(state)
           which returns legal actions for a state
     """
+
     def __init__(self, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
@@ -141,7 +141,7 @@ class QLearningAgent(ReinforcementAgent):
 class PacmanQAgent(QLearningAgent):
     "Exactly the same as QLearningAgent, but with different default parameters"
 
-    def __init__(self, epsilon=0.05,gamma=0.8,alpha=0.2, numTraining=0, **args):
+    def __init__(self, epsilon=0.05, gamma=0.7, alpha=0.1, numTraining=0, **args):
         """
         These default parameters can be changed from the pacman.py command line.
         For example, to change the exploration rate, try:
@@ -165,19 +165,19 @@ class PacmanQAgent(QLearningAgent):
         informs parent of action for Pacman.  Do not change or remove this
         method.
         """
-        action = QLearningAgent.getAction(self,state)
-        self.doAction(state,action)
+        action = QLearningAgent.getAction(self, state)
+        self.doAction(state, action)
         return action
 
 
 class ApproximateQAgent(PacmanQAgent):
     """
        ApproximateQLearningAgent
-
        You should only have to overwrite getQValue
        and update.  All other QLearningAgent functions
        should work as is.
     """
+
     def __init__(self, extractor='IdentityExtractor', **args):
         self.featExtractor = util.lookup(extractor, globals())()
         PacmanQAgent.__init__(self, **args)
@@ -198,10 +198,9 @@ class ApproximateQAgent(PacmanQAgent):
            Should update your weights based on transition
         """
         features = self.featExtractor.getFeatures(state, action)
-
+        correction = reward + self.discount * self.getValue(nextState) - self.getQValue(state, action)
         for feature in features:
-            self.weights[feature] += self.alpha * (reward + self.discount * self.getValue(nextState) -
-                                                   self.getQValue(state, action)) * features[feature]
+            self.weights[feature] += self.alpha * correction * features[feature]
 
     def final(self, state):
         "Called at the end of each game."
@@ -211,4 +210,4 @@ class ApproximateQAgent(PacmanQAgent):
         # did we finish training?
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
-            print("Final weights:" + self.weights)
+            print self.weights
