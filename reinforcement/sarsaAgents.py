@@ -140,8 +140,14 @@ class SarsaAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        correction = reward + self.discount * self.getQValue(nextState, self.getAction(nextState)) - self.getQValue(state, action)
+        self.traces[(state,action)] += 1
+
+        for states, actions in self.traces.keys():
+          self.q_table[(states,actions)] += self.alpha * correction * self.traces[(states,actions)]
+          self.traces[(states,actions)] = self.discount * self.lamda * self.traces[(states,actions)]
+
+        del self.traces[(states,actions)]
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -214,8 +220,12 @@ class ApproximateSarsaAgent(PacmanSarsaAgent):
         """
                    Should update your weights based on transition
                 """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        features = self.featExtractor.getFeatures(state, action)
+        nextAction = self.getAction(nextState)
+        correction = reward + self.discount * self.getQValue(nextState, nextAction) - self.getQValue(state, action)
+
+        for feature in features:
+            self.weights[feature] += self.alpha * correction * features[feature]
 
     def final(self, state):
         "Called at the end of each game."
@@ -226,4 +236,3 @@ class ApproximateSarsaAgent(PacmanSarsaAgent):
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
             print self.weights
-            pass
